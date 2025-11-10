@@ -4,10 +4,17 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "format:check": "biome format",
+    "format:fix": "biome format --write",
+    "lint:check": "biome lint",
+    "lint:fix": "biome lint --write"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs"
+  "type": "commonjs",
+  "devDependencies": {
+    "@biomejs/biome": "2.3.4"
+  }
 }
