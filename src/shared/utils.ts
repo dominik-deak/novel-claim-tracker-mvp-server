@@ -1,56 +1,59 @@
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
 
 export function generateId(): string {
-  return uuidv4();
+	return uuidv4();
 }
 
 export function getCurrentTimestamp(): string {
-  return new Date().toISOString();
+	return new Date().toISOString();
 }
 
 export function formatAmount(pence: number): string {
-  const pounds = pence / 100;
-  return new Intl.NumberFormat('en-GB', {
-    style: 'currency',
-    currency: 'GBP',
-  }).format(pounds);
+	const pounds = pence / 100;
+	return new Intl.NumberFormat("en-GB", {
+		style: "currency",
+		currency: "GBP",
+	}).format(pounds);
 }
 
 export function parseAmount(pounds: number): number {
-  return Math.round(pounds * 100);
+	return Math.round(pounds * 100);
 }
 
 export function isValidDate(dateString: string): boolean {
-  const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-  if (!dateRegex.test(dateString)) {
-    return false;
-  }
+	const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+	if (!dateRegex.test(dateString)) {
+		return false;
+	}
 
-  const date = new Date(dateString);
-  return !Number.isNaN(date.getTime());
+	const date = new Date(dateString);
+	return !Number.isNaN(date.getTime());
 }
 
 export function formatDate(isoDate: string): string {
-  const date = new Date(isoDate);
-  return new Intl.DateTimeFormat('en-GB').format(date);
+	const date = new Date(isoDate);
+	return new Intl.DateTimeFormat("en-GB").format(date);
 }
 
 export function formatDateRange(startDate: string, endDate: string): string {
-  return `${formatDate(startDate)} - ${formatDate(endDate)}`;
+	return `${formatDate(startDate)} - ${formatDate(endDate)}`;
 }
 
 export function isPastDate(isoDate: string): boolean {
-  const date = new Date(isoDate);
-  const now = new Date();
-  return date < now;
+	const date = new Date(isoDate);
+	const now = new Date();
+	return date < now;
 }
 
-export function calculatePeriodDays(startDate: string, endDate: string): number {
-  const start = new Date(startDate);
-  const end = new Date(endDate);
-  const diffTime = Math.abs(end.getTime() - start.getTime());
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  return diffDays;
+export function calculatePeriodDays(
+	startDate: string,
+	endDate: string,
+): number {
+	const start = new Date(startDate);
+	const end = new Date(endDate);
+	const diffTime = Math.abs(end.getTime() - start.getTime());
+	const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+	return diffDays;
 }
 
 /**
@@ -61,14 +64,14 @@ export function calculatePeriodDays(startDate: string, endDate: string): number 
  * const data = parseRequestBody(event.body);
  */
 export function parseRequestBody(body: string | null | undefined): unknown {
-  if (!body) {
-    return {};
-  }
-  try {
-    return JSON.parse(body);
-  } catch {
-    return {};
-  }
+	if (!body) {
+		return {};
+	}
+	try {
+		return JSON.parse(body);
+	} catch {
+		return {};
+	}
 }
 
 /**
@@ -80,10 +83,10 @@ export function parseRequestBody(body: string | null | undefined): unknown {
  * const claimId = getPathParameter(event, 'id');
  */
 export function getPathParameter(
-  event: { pathParameters?: Record<string, string | undefined> | null },
-  paramName: string
+	event: { pathParameters?: Record<string, string | undefined> | null },
+	paramName: string,
 ): string | null {
-  return event.pathParameters?.[paramName] || null;
+	return event.pathParameters?.[paramName] || null;
 }
 
 /**
@@ -95,8 +98,8 @@ export function getPathParameter(
  * const status = getQueryParameter(event, 'status');
  */
 export function getQueryParameter(
-  event: { queryStringParameters?: Record<string, string | undefined> | null },
-  paramName: string
+	event: { queryStringParameters?: Record<string, string | undefined> | null },
+	paramName: string,
 ): string | null {
-  return event.queryStringParameters?.[paramName] || null;
+	return event.queryStringParameters?.[paramName] || null;
 }
