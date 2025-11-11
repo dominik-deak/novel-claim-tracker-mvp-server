@@ -1,0 +1,13 @@
+# Ignore compiled JavaScript and TypeScript declaration files
+**/*.js
+**/*.d.ts
+
+# Ignore CDK output
+cdk.out
+.cdk.staging
+
+# Ignore node_modules
+node_modules
+
+# Ignore Jest config (JavaScript file)
+!jest.config.js

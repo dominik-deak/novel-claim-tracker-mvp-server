@@ -15,9 +15,28 @@
 	"linter": {
 		"enabled": true,
 		"rules": {
-			"recommended": true
+			"recommended": true,
+			"correctness": {
+				"noUnusedVariables": {
+					"level": "error",
+					"options": {
+						"ignoreRestSiblings": true
+					}
+				}
+			},
+			"suspicious": {
+				"noExplicitAny": "warn"
+			}
 		}
 	},
+	"overrides": [
+		{
+			"includes": ["**/*.js", "**/*.d.ts"],
+			"linter": {
+				"enabled": false
+			}
+		}
+	],
 	"javascript": {
 		"formatter": {
 			"quoteStyle": "double"
