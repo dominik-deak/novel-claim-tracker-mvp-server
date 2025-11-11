@@ -27,10 +27,25 @@ const claims = new Map<string, Claim>();
 const projects = new Map<string, Project>();
 const claimProjects = new Map<string, Set<string>>();
 
+function getUserId(req: express.Request): string | null {
+	const header =
+		req.headers["x-user-id"] ||
+		req.headers["X-User-Id"] ||
+		req.headers["X-USER-ID"];
+	if (typeof header === "string") {
+		return header;
+	}
+	if (Array.isArray(header) && header.length > 0) {
+		return header[0];
+	}
+	return null;
+}
+
 app.post("/claims", (req, res) => {
 	try {
 		const validated = CreateClaimSchema.parse(req.body);
 
+		const userId = getUserId(req);
 		const now = getCurrentTimestamp();
 		const claim: Claim = {
 			claimId: generateId(),
@@ -38,7 +53,7 @@ app.post("/claims", (req, res) => {
 			claimPeriod: validated.claimPeriod,
 			amount: validated.amount,
 			status: "Draft",
-			userId: null,
+			userId,
 			submittedBy: null,
 			reviewedBy: null,
 			submittedAt: null,
@@ -78,11 +93,16 @@ app.post("/claims", (req, res) => {
 
 app.get("/claims", (req, res) => {
 	try {
+		const userId = getUserId(req);
 		const validated = ClaimQuerySchema.parse({
 			status: req.query.status,
 		});
 
 		let claimsArray = Array.from(claims.values());
+
+		if (userId) {
+			claimsArray = claimsArray.filter((claim) => claim.userId === userId);
+		}
 
 		if (validated.status) {
 			claimsArray = claimsArray.filter(
@@ -240,12 +260,13 @@ app.post("/projects", (req, res) => {
 	try {
 		const validated = CreateProjectSchema.parse(req.body);
 
+		const userId = getUserId(req);
 		const now = getCurrentTimestamp();
 		const project: Project = {
 			projectId: generateId(),
 			name: validated.name,
 			description: validated.description,
-			userId: null,
+			userId,
 			createdAt: now,
 			updatedAt: now,
 		};
@@ -264,8 +285,16 @@ app.post("/projects", (req, res) => {
 	}
 });
 
-app.get("/projects", (_req, res) => {
-	const projectsArray = Array.from(projects.values());
+app.get("/projects", (req, res) => {
+	const userId = getUserId(req);
+	let projectsArray = Array.from(projects.values());
+
+	if (userId) {
+		projectsArray = projectsArray.filter(
+			(project) => project.userId === userId,
+		);
+	}
+
 	return res.json({ projects: projectsArray });
 });
 

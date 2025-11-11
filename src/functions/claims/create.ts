@@ -1,5 +1,6 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { ZodError } from "zod";
+import { getUserIdFromEvent } from "../../shared/auth";
 import { getProject, linkProjectToClaim, saveClaim } from "../../shared/db";
 import {
 	errorResponse,
@@ -22,6 +23,7 @@ export async function handler(
 		const body = parseRequestBody(event.body);
 		const validated = CreateClaimSchema.parse(body);
 
+		const userId = getUserIdFromEvent(event);
 		const now = getCurrentTimestamp();
 		const claim: Claim = {
 			claimId: generateId(),
@@ -29,7 +31,7 @@ export async function handler(
 			claimPeriod: validated.claimPeriod,
 			amount: validated.amount,
 			status: "Draft",
-			userId: null,
+			userId,
 			submittedBy: null,
 			reviewedBy: null,
 			submittedAt: null,

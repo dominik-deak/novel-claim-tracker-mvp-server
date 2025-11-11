@@ -1,5 +1,6 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { ZodError } from "zod";
+import { getUserIdFromEvent } from "../../shared/auth";
 import { saveProject } from "../../shared/db";
 import {
 	internalErrorResponse,
@@ -21,12 +22,13 @@ export async function handler(
 		const body = parseRequestBody(event.body);
 		const validated = CreateProjectSchema.parse(body);
 
+		const userId = getUserIdFromEvent(event);
 		const now = getCurrentTimestamp();
 		const project: Project = {
 			projectId: generateId(),
 			name: validated.name,
 			description: validated.description,
-			userId: null,
+			userId,
 			createdAt: now,
 			updatedAt: now,
 		};
