@@ -11,7 +11,7 @@ const CORS_HEADERS = {
  * @param data - Response data to send to client
  */
 export function successResponse(
-  data: any,
+  data: unknown,
   statusCode = 200
 ): APIGatewayProxyResult {
   return {
@@ -35,10 +35,10 @@ export function errorResponse(
 }
 
 export function validationErrorResponse(
-  errors: Array<{ message: string; path: (string | number)[] }>
+  errors: Array<{ message: string; path: PropertyKey[] }>
 ): APIGatewayProxyResult {
   const formattedErrors = errors.map((err) => ({
-    field: err.path.join('.'),
+    field: err.path.filter((p): p is string | number => typeof p !== 'symbol').join('.'),
     message: err.message,
   }));
 
@@ -62,7 +62,7 @@ export function notFoundResponse(
 /**
  * @param error - Error object
  */
-export function internalErrorResponse(error: any): APIGatewayProxyResult {
+export function internalErrorResponse(error: unknown): APIGatewayProxyResult {
   console.error('Internal server error:', error);
 
   return {
@@ -71,7 +71,7 @@ export function internalErrorResponse(error: any): APIGatewayProxyResult {
     body: JSON.stringify({
       error: 'Internal server error',
       ...(process.env.NODE_ENV === 'development' && {
-        details: error.message,
+        details: error instanceof Error ? error.message : String(error),
       }),
     }),
   };

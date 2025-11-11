@@ -60,7 +60,7 @@ export function calculatePeriodDays(startDate: string, endDate: string): number 
  * @example
  * const data = parseRequestBody(event.body);
  */
-export function parseRequestBody(body: string | null | undefined): any {
+export function parseRequestBody(body: string | null | undefined): unknown {
   if (!body) {
     return {};
   }
@@ -80,7 +80,7 @@ export function parseRequestBody(body: string | null | undefined): any {
  * const claimId = getPathParameter(event, 'id');
  */
 export function getPathParameter(
-  event: { pathParameters?: Record<string, string> | null },
+  event: { pathParameters?: Record<string, string | undefined> | null },
   paramName: string
 ): string | null {
   return event.pathParameters?.[paramName] || null;
@@ -95,7 +95,7 @@ export function getPathParameter(
  * const status = getQueryParameter(event, 'status');
  */
 export function getQueryParameter(
-  event: { queryStringParameters?: Record<string, string> | null },
+  event: { queryStringParameters?: Record<string, string | undefined> | null },
   paramName: string
 ): string | null {
   return event.queryStringParameters?.[paramName] || null;

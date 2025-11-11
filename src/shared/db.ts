@@ -82,7 +82,7 @@ export async function updateClaim(
 ): Promise<Claim> {
   const updateExpressionParts: string[] = [];
   const expressionAttributeNames: Record<string, string> = {};
-  const expressionAttributeValues: Record<string, any> = {};
+  const expressionAttributeValues: Record<string, unknown> = {};
 
   updates.updatedAt = new Date().toISOString();
 
@@ -108,7 +108,11 @@ export async function updateClaim(
     })
   );
 
-  const { PK, SK, ...claim } = result.Attributes!; // remove keys before returning
+  if (!result.Attributes) {
+    throw new Error('Failed to update claim');
+  }
+
+  const { PK, SK, ...claim } = result.Attributes; // remove keys before returning
   return claim as Claim;
 }
 
@@ -173,7 +177,7 @@ export async function updateProject(
 ): Promise<Project> {
   const updateExpressionParts: string[] = [];
   const expressionAttributeNames: Record<string, string> = {};
-  const expressionAttributeValues: Record<string, any> = {};
+  const expressionAttributeValues: Record<string, unknown> = {};
 
   updates.updatedAt = new Date().toISOString();
 
@@ -199,7 +203,11 @@ export async function updateProject(
     })
   );
 
-  const { PK, SK, ...project } = result.Attributes!; // remove keys before returning
+  if (!result.Attributes) {
+    throw new Error('Failed to update project');
+  }
+
+  const { PK, SK, ...project } = result.Attributes; // remove keys before returning
   return project as Project;
 }
 
