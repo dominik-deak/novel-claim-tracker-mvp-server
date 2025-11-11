@@ -1,10 +1,15 @@
 {
 	"name": "backend",
 	"version": "1.0.0",
-	"description": "",
-	"main": "index.js",
+	"description": "Claim Tracker Backend - AWS CDK Infrastructure",
+	"bin": {
+		"claim-tracker": "bin/claim-tracker.js"
+	},
 	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1",
+		"build": "tsc",
+		"watch": "tsc -w",
+		"test": "jest",
+		"cdk": "cdk",
 		"format:check": "biome format",
 		"format:fix": "biome format --write",
 		"lint:check": "biome lint",
@@ -20,6 +25,28 @@
 	"type": "commonjs",
 	"devDependencies": {
 		"@biomejs/biome": "2.3.4",
-		"husky": "^9.1.7"
+		"@types/aws-lambda": "^8.10.157",
+		"@types/cors": "^2.8.19",
+		"@types/express": "^5.0.5",
+		"@types/jest": "^30.0.0",
+		"@types/node": "^24.10.0",
+		"@types/uuid": "^10.0.0",
+		"aws-cdk": "^2.1031.2",
+		"esbuild": "^0.27.0",
+		"husky": "^9.1.7",
+		"jest": "^30.2.0",
+		"ts-jest": "^29.4.5",
+		"ts-node": "^10.9.2",
+		"typescript": "^5.9.3"
+	},
+	"dependencies": {
+		"@aws-sdk/client-dynamodb": "^3.928.0",
+		"@aws-sdk/lib-dynamodb": "^3.928.0",
+		"aws-cdk-lib": "^2.223.0",
+		"constructs": "^10.4.3",
+		"cors": "^2.8.5",
+		"express": "^5.1.0",
+		"uuid": "^13.0.0",
+		"zod": "^4.1.12"
 	}
 }
