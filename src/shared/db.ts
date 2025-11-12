@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/correctness/noUnusedVariables: we use the keys to remove them from the returned object */
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import {
 	DeleteCommand,
