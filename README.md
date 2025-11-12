@@ -300,10 +300,8 @@ Response: 200 OK
 ```http
 DELETE /claims/:id
 
-Response: 200 OK
-{
-  "message": "Claim deleted successfully"
-}
+Response: 204 No Content
+(No response body)
 ```
 
 **Link Projects to Claim**
@@ -317,7 +315,7 @@ Content-Type: application/json
 
 Response: 200 OK
 {
-  "claim": {...}
+  "message": "Projects linked successfully"
 }
 ```
 
@@ -327,7 +325,7 @@ DELETE /claims/:id/projects/:projectId
 
 Response: 200 OK
 {
-  "message": "Project unlinked from claim"
+  "message": "Project unlinked successfully"
 }
 ```
 
@@ -407,13 +405,13 @@ Response: 200 OK
 ```http
 DELETE /projects/:id
 
-Response: 200 OK
-{
-  "message": "Project deleted successfully"
-}
+Response: 204 No Content
+(No response body)
 ```
 
 ### Error Responses
+
+#### Standard Error Format
 
 All error responses follow this format:
 
@@ -423,10 +421,310 @@ All error responses follow this format:
 }
 ```
 
+**Example - 404 Not Found:**
+```json
+{
+  "error": "Claim with ID invalid-claim-id not found"
+}
+```
+
+#### Validation Error Format
+
+Validation errors (400 Bad Request) include detailed information about each validation failure:
+
+```json
+{
+  "error": "Validation failed",
+  "details": [
+    {
+      "field": "companyName",
+      "message": "Company name is required"
+    },
+    {
+      "field": "amount",
+      "message": "Amount must be positive"
+    }
+  ]
+}
+```
+
+**Real Zod Validation Error Example:**
+```json
+{
+  "error": "Validation failed",
+  "details": [
+    {
+      "origin": "string",
+      "code": "too_small",
+      "minimum": 1,
+      "inclusive": true,
+      "path": ["companyName"],
+      "message": "Company name is required"
+    },
+    {
+      "origin": "number",
+      "code": "too_small",
+      "minimum": 0,
+      "inclusive": false,
+      "path": ["amount"],
+      "message": "Amount must be positive"
+    },
+    {
+      "origin": "string",
+      "code": "invalid_format",
+      "format": "regex",
+      "pattern": "/^\\d{4}-\\d{2}-\\d{2}$/",
+      "path": ["claimPeriod", "startDate"],
+      "message": "Date must be in ISO 8601 format (YYYY-MM-DD)"
+    }
+  ]
+}
+```
+
 **Common Status Codes:**
-- `400` - Bad Request (validation errors)
-- `404` - Not Found
-- `500` - Internal Server Error
+- `200` - OK (successful GET, PATCH, POST operations)
+- `201` - Created (successful resource creation)
+- `204` - No Content (successful DELETE operations)
+- `400` - Bad Request (validation errors, invalid data)
+- `404` - Not Found (resource doesn't exist)
+- `500` - Internal Server Error (unexpected server errors)
+
+## 🧪 Testing with curl
+
+Below are complete curl commands to test every API endpoint locally.
+
+**Prerequisites:**
+- Mock server running at `http://localhost:3001`
+- `jq` installed (optional, for pretty JSON output)
+
+### Projects Endpoints
+
+**Create Project:**
+```bash
+curl -X POST http://localhost:3001/projects \
+  -H "Content-Type: application/json" \
+  -H "X-User-Id: user-1" \
+  -d '{
+    "name": "AI Algorithm Development",
+    "description": "Machine learning algorithms for predictive analytics"
+  }'
+```
+
+**List All Projects:**
+```bash
+curl -X GET http://localhost:3001/projects \
+  -H "X-User-Id: user-1"
+```
+
+**Get Single Project:**
+```bash
+curl -X GET http://localhost:3001/projects/{project-id} \
+  -H "X-User-Id: user-1"
+```
+
+**Update Project:**
+```bash
+curl -X PATCH http://localhost:3001/projects/{project-id} \
+  -H "Content-Type: application/json" \
+  -H "X-User-Id: user-1" \
+  -d '{
+    "name": "AI Algorithm Development - Updated",
+    "description": "Advanced machine learning with deep learning"
+  }'
+```
+
+**Delete Project:**
+```bash
+curl -X DELETE http://localhost:3001/projects/{project-id} \
+  -H "X-User-Id: user-1"
+```
+
+### Claims Endpoints
+
+**Create Claim with Projects:**
+```bash
+curl -X POST http://localhost:3001/claims \
+  -H "Content-Type: application/json" \
+  -H "X-User-Id: user-1" \
+  -d '{
+    "companyName": "Acme Corporation Ltd",
+    "claimPeriod": {
+      "startDate": "2024-01-01",
+      "endDate": "2024-12-31"
+    },
+    "amount": 50000,
+    "projectIds": ["project-id-1", "project-id-2"]
+  }'
+```
+
+**Create Claim without Projects:**
+```bash
+curl -X POST http://localhost:3001/claims \
+  -H "Content-Type: application/json" \
+  -H "X-User-Id: user-1" \
+  -d '{
+    "companyName": "TechStart Ltd",
+    "claimPeriod": {
+      "startDate": "2025-01-01",
+      "endDate": "2025-12-31"
+    },
+    "amount": 75000,
+    "projectIds": []
+  }'
+```
+
+**List All Claims:**
+```bash
+curl -X GET http://localhost:3001/claims \
+  -H "X-User-Id: user-1"
+```
+
+**List Claims by Status:**
+```bash
+curl -X GET "http://localhost:3001/claims?status=Draft" \
+  -H "X-User-Id: user-1"
+
+curl -X GET "http://localhost:3001/claims?status=Submitted" \
+  -H "X-User-Id: user-1"
+
+curl -X GET "http://localhost:3001/claims?status=Approved" \
+  -H "X-User-Id: user-1"
+```
+
+**Get Single Claim:**
+```bash
+curl -X GET http://localhost:3001/claims/{claim-id} \
+  -H "X-User-Id: user-1"
+```
+
+**Update Claim Status:**
+```bash
+curl -X PATCH http://localhost:3001/claims/{claim-id} \
+  -H "Content-Type: application/json" \
+  -H "X-User-Id: user-1" \
+  -d '{
+    "status": "Submitted"
+  }'
+```
+
+**Delete Claim:**
+```bash
+curl -X DELETE http://localhost:3001/claims/{claim-id} \
+  -H "X-User-Id: user-1"
+```
+
+**Link Projects to Claim:**
+```bash
+curl -X POST http://localhost:3001/claims/{claim-id}/projects \
+  -H "Content-Type: application/json" \
+  -H "X-User-Id: user-1" \
+  -d '{
+    "projectIds": ["project-id-3"]
+  }'
+```
+
+**Unlink Project from Claim:**
+```bash
+curl -X DELETE http://localhost:3001/claims/{claim-id}/projects/{project-id} \
+  -H "X-User-Id: user-1"
+```
+
+### Testing Validation Errors
+
+**Empty Company Name (400 Error):**
+```bash
+curl -X POST http://localhost:3001/claims \
+  -H "Content-Type: application/json" \
+  -H "X-User-Id: user-1" \
+  -d '{
+    "companyName": "",
+    "claimPeriod": {"startDate": "2024-01-01", "endDate": "2024-12-31"},
+    "amount": 50000,
+    "projectIds": []
+  }'
+```
+
+**Invalid Date Format (400 Error):**
+```bash
+curl -X POST http://localhost:3001/claims \
+  -H "Content-Type: application/json" \
+  -H "X-User-Id: user-1" \
+  -d '{
+    "companyName": "Test Corp",
+    "claimPeriod": {"startDate": "invalid-date", "endDate": "2024-12-31"},
+    "amount": 50000,
+    "projectIds": []
+  }'
+```
+
+**Negative Amount (400 Error):**
+```bash
+curl -X POST http://localhost:3001/claims \
+  -H "Content-Type: application/json" \
+  -H "X-User-Id: user-1" \
+  -d '{
+    "companyName": "Test Corp",
+    "claimPeriod": {"startDate": "2024-01-01", "endDate": "2024-12-31"},
+    "amount": -1000,
+    "projectIds": []
+  }'
+```
+
+**Non-existent Resource (404 Error):**
+```bash
+curl -X GET http://localhost:3001/claims/invalid-claim-id \
+  -H "X-User-Id: user-1"
+```
+
+### Complete Testing Flow
+
+Here's a complete flow to test the entire system:
+
+```bash
+# 1. Create two projects
+PROJECT_1=$(curl -s -X POST http://localhost:3001/projects \
+  -H "Content-Type: application/json" \
+  -H "X-User-Id: user-1" \
+  -d '{"name":"AI Research","description":"Machine learning research"}' \
+  | jq -r '.project.projectId')
+
+PROJECT_2=$(curl -s -X POST http://localhost:3001/projects \
+  -H "Content-Type: application/json" \
+  -H "X-User-Id: user-1" \
+  -d '{"name":"Quantum Computing","description":"Quantum algorithm research"}' \
+  | jq -r '.project.projectId')
+
+echo "Created projects: $PROJECT_1, $PROJECT_2"
+
+# 2. Create claim with projects
+CLAIM_ID=$(curl -s -X POST http://localhost:3001/claims \
+  -H "Content-Type: application/json" \
+  -H "X-User-Id: user-1" \
+  -d "{\"companyName\":\"Acme Corp\",\"claimPeriod\":{\"startDate\":\"2024-01-01\",\"endDate\":\"2024-12-31\"},\"amount\":50000,\"projectIds\":[\"$PROJECT_1\",\"$PROJECT_2\"]}" \
+  | jq -r '.claim.claimId')
+
+echo "Created claim: $CLAIM_ID"
+
+# 3. Get claim with projects
+curl -s -X GET http://localhost:3001/claims/$CLAIM_ID \
+  -H "X-User-Id: user-1" | jq
+
+# 4. Update claim status
+curl -s -X PATCH http://localhost:3001/claims/$CLAIM_ID \
+  -H "Content-Type: application/json" \
+  -H "X-User-Id: user-1" \
+  -d '{"status":"Submitted"}' | jq
+
+# 5. Get project and see linked claims
+curl -s -X GET http://localhost:3001/projects/$PROJECT_1 \
+  -H "X-User-Id: user-1" | jq
+
+# 6. List all claims with Submitted status
+curl -s -X GET "http://localhost:3001/claims?status=Submitted" \
+  -H "X-User-Id: user-1" | jq
+```
+
+**Note:** The script above requires `jq` for JSON parsing. If you don't have `jq`, remove the `| jq` parts and parse the JSON manually.
 
 ## ☁️ AWS Deployment
 
