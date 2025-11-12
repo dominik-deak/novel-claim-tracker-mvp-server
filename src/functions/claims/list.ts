@@ -17,7 +17,9 @@ export async function handler(
 	try {
 		const userId = getUserIdFromEvent(event);
 		const status = getQueryParameter(event, "status");
-		const validated = ClaimQuerySchema.parse({ status });
+		const validated = ClaimQuerySchema.parse({
+			status: status ?? undefined,
+		});
 		const allClaims = await getAllClaims(validated.status);
 
 		const claims = userId

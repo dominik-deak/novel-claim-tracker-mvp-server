@@ -101,5 +101,5 @@ export function getQueryParameter(
 	event: { queryStringParameters?: Record<string, string | undefined> | null },
 	paramName: string,
 ): string | null {
-	return event.queryStringParameters?.[paramName] || null;
+	return event.queryStringParameters?.[paramName] ?? null;
 }
