@@ -143,7 +143,7 @@ describe("Projects API", () => {
 			expect(mockDb.getAllProjects).toHaveBeenCalled();
 		});
 
-		it("should filter projects by userId", async () => {
+		it("should return all projects regardless of userId (MVP behavior)", async () => {
 			const allProjects = [
 				createMockProject({ projectId: "proj-1", userId: "user-1" }),
 				createMockProject({ projectId: "proj-2", userId: "user-2" }),
@@ -156,8 +156,10 @@ describe("Projects API", () => {
 
 			expectSuccessResponse(result);
 			const body = parseResponseBody<{ projects: typeof allProjects }>(result);
-			expect(body.projects).toHaveLength(2);
-			expect(body.projects.every((p) => p.userId === "user-1")).toBe(true);
+			// MVP: No userId filtering - returns all projects
+			expect(body.projects).toHaveLength(3);
+			expect(body.projects.some((p) => p.userId === "user-1")).toBe(true);
+			expect(body.projects.some((p) => p.userId === "user-2")).toBe(true);
 		});
 
 		it("should return empty array when no projects exist", async () => {
