@@ -142,12 +142,14 @@ export class ClaimTrackerStack extends cdk.Stack {
 		projectsTable.grantReadData(createClaimFn);
 		projectsTable.grantReadData(listClaimsFn);
 		projectsTable.grantReadData(getClaimFn);
+		projectsTable.grantReadData(updateClaimFn);
 		projectsTable.grantReadData(linkProjectsFn);
 		projectsTable.grantReadData(unlinkProjectFn);
 
 		claimProjectsTable.grantReadWriteData(createClaimFn);
 		claimProjectsTable.grantReadData(listClaimsFn);
 		claimProjectsTable.grantReadData(getClaimFn);
+		claimProjectsTable.grantReadData(updateClaimFn);
 		claimProjectsTable.grantReadWriteData(deleteClaimFn);
 		claimProjectsTable.grantReadWriteData(linkProjectsFn);
 		claimProjectsTable.grantReadWriteData(unlinkProjectFn);
