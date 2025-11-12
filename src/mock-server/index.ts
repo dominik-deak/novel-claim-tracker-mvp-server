@@ -296,7 +296,7 @@ app.post("/projects", (req, res) => {
 	}
 });
 
-app.get("/projects", (req, res) => {
+app.get("/projects", (_req, res) => {
 	const projectsArray = Array.from(projects.values());
 
 	// const userId = getUserId(req);

@@ -3,7 +3,7 @@ import { getAllProjects } from "../../shared/db";
 import { internalErrorResponse, successResponse } from "../../shared/responses";
 
 export async function handler(
-	event: APIGatewayProxyEvent,
+	_event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> {
 	try {
 		const allProjects = await getAllProjects();
