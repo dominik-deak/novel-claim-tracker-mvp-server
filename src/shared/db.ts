@@ -84,9 +84,11 @@ export async function updateClaim(
 
 	updates.updatedAt = new Date().toISOString();
 
-	Object.entries(updates).forEach(([key, value], index) => {
-		const attrName = `#attr${index}`;
-		const attrValue = `:val${index}`;
+	// Use explicit key-based placeholders to properly handle DynamoDB reserved keywords
+	// (like 'status') and ensure predictable attribute name mapping
+	Object.entries(updates).forEach(([key, value]) => {
+		const attrName = `#${key}`;
+		const attrValue = `:${key}`;
 		updateExpressionParts.push(`${attrName} = ${attrValue}`);
 		expressionAttributeNames[attrName] = key;
 		expressionAttributeValues[attrValue] = value;
@@ -111,6 +113,11 @@ export async function updateClaim(
 	}
 
 	const { PK, SK, ...claim } = result.Attributes;
+
+	if (!claim.claimId || !claim.status) {
+		throw new Error("Updated claim is missing required fields");
+	}
+
 	return claim as Claim;
 }
 
@@ -180,9 +187,11 @@ export async function updateProject(
 
 	updates.updatedAt = new Date().toISOString();
 
-	Object.entries(updates).forEach(([key, value], index) => {
-		const attrName = `#attr${index}`;
-		const attrValue = `:val${index}`;
+	// Use explicit key-based placeholders to properly handle DynamoDB reserved keywords
+	// and ensure predictable attribute name mapping
+	Object.entries(updates).forEach(([key, value]) => {
+		const attrName = `#${key}`;
+		const attrValue = `:${key}`;
 		updateExpressionParts.push(`${attrName} = ${attrValue}`);
 		expressionAttributeNames[attrName] = key;
 		expressionAttributeValues[attrValue] = value;
@@ -207,6 +216,11 @@ export async function updateProject(
 	}
 
 	const { PK, SK, ...project } = result.Attributes;
+
+	if (!project.projectId || !project.name) {
+		throw new Error("Updated project is missing required fields");
+	}
+
 	return project as Project;
 }
 

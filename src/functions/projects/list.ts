@@ -1,5 +1,4 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import { getUserIdFromEvent } from "../../shared/auth";
 import { getAllProjects } from "../../shared/db";
 import { internalErrorResponse, successResponse } from "../../shared/responses";
 
@@ -7,12 +6,15 @@ export async function handler(
 	event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> {
 	try {
-		const userId = getUserIdFromEvent(event);
 		const allProjects = await getAllProjects();
 
-		const projects = userId
-			? allProjects.filter((project) => project.userId === userId)
-			: allProjects;
+		// const userId = getUserIdFromEvent(event);
+		// const projects = userId
+		// 	? allProjects.filter((project) => project.userId === userId)
+		// 	: allProjects;
+
+		// MVP: Show all projects to all users (no userId filtering for demo purposes)
+		const projects = allProjects;
 
 		return successResponse({ projects });
 	} catch (error: unknown) {

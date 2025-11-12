@@ -93,16 +93,17 @@ app.post("/claims", (req, res) => {
 
 app.get("/claims", (req, res) => {
 	try {
-		const userId = getUserId(req);
 		const validated = ClaimQuerySchema.parse({
 			status: req.query.status,
 		});
 
 		let claimsArray = Array.from(claims.values());
 
-		if (userId) {
-			claimsArray = claimsArray.filter((claim) => claim.userId === userId);
-		}
+		// const userId = getUserId(req);
+		// if (userId) {
+		// 	claimsArray = claimsArray.filter((claim) => claim.userId === userId);
+		// }
+		// MVP: Show all claims to all users (no userId filtering for demo purposes)
 
 		if (validated.status) {
 			claimsArray = claimsArray.filter(
@@ -174,7 +175,17 @@ app.patch("/claims/:id", (req, res) => {
 
 		claims.set(id, updatedClaim);
 
-		return res.json({ claim: updatedClaim });
+		const projectIds = claimProjects.get(id) || new Set();
+		const linkedProjects = Array.from(projectIds)
+			.map((pid) => projects.get(pid))
+			.filter((p): p is Project => p !== undefined);
+
+		const claimWithProjects: ClaimWithProjects = {
+			...updatedClaim,
+			projects: linkedProjects,
+		};
+
+		return res.json({ claim: claimWithProjects });
 	} catch (error: unknown) {
 		if (error instanceof ZodError) {
 			return res.status(400).json({
@@ -286,14 +297,15 @@ app.post("/projects", (req, res) => {
 });
 
 app.get("/projects", (req, res) => {
-	const userId = getUserId(req);
-	let projectsArray = Array.from(projects.values());
+	const projectsArray = Array.from(projects.values());
 
-	if (userId) {
-		projectsArray = projectsArray.filter(
-			(project) => project.userId === userId,
-		);
-	}
+	// const userId = getUserId(req);
+	// if (userId) {
+	// 	projectsArray = projectsArray.filter(
+	// 		(project) => project.userId === userId,
+	// 	);
+	// }
+	// MVP: Show all projects to all users (no userId filtering for demo purposes)
 
 	return res.json({ projects: projectsArray });
 });

@@ -1,6 +1,5 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { ZodError } from "zod";
-import { getUserIdFromEvent } from "../../shared/auth";
 import { getAllClaims, getProjectsForClaim } from "../../shared/db";
 import {
 	internalErrorResponse,
@@ -15,16 +14,19 @@ export async function handler(
 	event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> {
 	try {
-		const userId = getUserIdFromEvent(event);
 		const status = getQueryParameter(event, "status");
 		const validated = ClaimQuerySchema.parse({
 			status: status ?? undefined,
 		});
 		const allClaims = await getAllClaims(validated.status);
 
-		const claims = userId
-			? allClaims.filter((claim) => claim.userId === userId)
-			: allClaims;
+		// const userId = getUserIdFromEvent(event);
+		// const claims = userId
+		// 	? allClaims.filter((claim) => claim.userId === userId)
+		// 	: allClaims;
+
+		// MVP: Show all claims to all users (no userId filtering for demo purposes)
+		const claims = allClaims;
 
 		const claimsWithProjects: ClaimWithProjects[] = await Promise.all(
 			claims.map(async (claim) => {
