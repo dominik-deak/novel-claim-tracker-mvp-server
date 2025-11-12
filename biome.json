@@ -35,6 +35,15 @@
 			"linter": {
 				"enabled": false
 			}
+		},
+		{
+			"includes": ["coverage/**"],
+			"linter": {
+				"enabled": false
+			},
+			"formatter": {
+				"enabled": false
+			}
 		}
 	],
 	"javascript": {
