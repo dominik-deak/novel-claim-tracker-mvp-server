@@ -157,7 +157,7 @@ export class ClaimTrackerStack extends cdk.Stack {
 			defaultCorsPreflightOptions: {
 				allowOrigins: apigateway.Cors.ALL_ORIGINS,
 				allowMethods: apigateway.Cors.ALL_METHODS,
-				allowHeaders: ["Content-Type", "Authorization"],
+				allowHeaders: ["Content-Type", "Authorization", "X-User-Id"],
 			},
 		});
 
