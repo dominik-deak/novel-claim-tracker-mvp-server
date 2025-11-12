@@ -11,6 +11,7 @@ import {
 	isValidDate,
 	parseAmount,
 	parseRequestBody,
+	validateEnvVars,
 } from "../src/shared/utils";
 
 describe("Utils", () => {
@@ -416,6 +417,120 @@ describe("Utils", () => {
 					queryStringParameters: { company: "Test%20Company" },
 				};
 				expect(getQueryParameter(event, "company")).toBe("Test%20Company");
+			});
+		});
+	});
+
+	describe("Environment Variable Validation", () => {
+		describe("validateEnvVars", () => {
+			const originalEnv = process.env;
+
+			beforeEach(() => {
+				process.env = { ...originalEnv };
+			});
+
+			afterEach(() => {
+				process.env = originalEnv;
+			});
+
+			it("should not throw when all required variables are present", () => {
+				process.env.VAR1 = "value1";
+				process.env.VAR2 = "value2";
+				process.env.VAR3 = "value3";
+
+				expect(() => {
+					validateEnvVars(["VAR1", "VAR2", "VAR3"]);
+				}).not.toThrow();
+			});
+
+			it("should not throw when empty array is provided", () => {
+				expect(() => {
+					validateEnvVars([]);
+				}).not.toThrow();
+			});
+
+			it("should throw when single required variable is missing", () => {
+				process.env.VAR1 = "value1";
+				delete process.env.VAR2;
+
+				expect(() => {
+					validateEnvVars(["VAR1", "VAR2"]);
+				}).toThrow("Missing required environment variables: VAR2");
+			});
+
+			it("should throw when multiple required variables are missing", () => {
+				process.env.VAR1 = "value1";
+				delete process.env.VAR2;
+				delete process.env.VAR3;
+
+				expect(() => {
+					validateEnvVars(["VAR1", "VAR2", "VAR3"]);
+				}).toThrow("Missing required environment variables: VAR2, VAR3");
+			});
+
+			it("should throw with all missing variables in error message", () => {
+				delete process.env.MISSING1;
+				delete process.env.MISSING2;
+				delete process.env.MISSING3;
+
+				expect(() => {
+					validateEnvVars(["MISSING1", "MISSING2", "MISSING3"]);
+				}).toThrow(
+					"Missing required environment variables: MISSING1, MISSING2, MISSING3",
+				);
+			});
+
+			it("should treat empty string as missing", () => {
+				process.env.EMPTY_VAR = "";
+
+				expect(() => {
+					validateEnvVars(["EMPTY_VAR"]);
+				}).toThrow("Missing required environment variables: EMPTY_VAR");
+			});
+
+			it("should correctly identify undefined vs present variables", () => {
+				process.env.DEFINED = "defined";
+				delete process.env.UNDEFINED;
+
+				expect(() => {
+					validateEnvVars(["DEFINED", "UNDEFINED"]);
+				}).toThrow("Missing required environment variables: UNDEFINED");
+			});
+
+			it("should handle variables with whitespace values", () => {
+				process.env.WHITESPACE_VAR = "   ";
+
+				expect(() => {
+					validateEnvVars(["WHITESPACE_VAR"]);
+				}).not.toThrow();
+			});
+
+			it("should preserve order of missing variables in error message", () => {
+				delete process.env.FIRST;
+				delete process.env.SECOND;
+				delete process.env.THIRD;
+
+				expect(() => {
+					validateEnvVars(["FIRST", "SECOND", "THIRD"]);
+				}).toThrow(
+					"Missing required environment variables: FIRST, SECOND, THIRD",
+				);
+			});
+
+			it("should handle single variable requirement", () => {
+				process.env.SINGLE_VAR = "value";
+
+				expect(() => {
+					validateEnvVars(["SINGLE_VAR"]);
+				}).not.toThrow();
+			});
+
+			it("should throw Error with appropriate type", () => {
+				delete process.env.MISSING;
+
+				expect(() => {
+					validateEnvVars(["MISSING"]);
+				}).toThrow(Error);
 			});
 		});
 	});
