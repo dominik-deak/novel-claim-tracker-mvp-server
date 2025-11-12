@@ -1,4 +1,3 @@
-/** biome-ignore-all lint/correctness/noUnusedVariables: we use the keys to remove them from the returned object */
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import {
 	DeleteCommand,
@@ -10,6 +9,9 @@ import {
 	UpdateCommand,
 } from "@aws-sdk/lib-dynamodb";
 import type { Claim, Project } from "./types";
+import { validateEnvVars } from "./utils";
+
+validateEnvVars(["CLAIMS_TABLE", "PROJECTS_TABLE", "CLAIM_PROJECTS_TABLE"]);
 
 const client = new DynamoDBClient({});
 export const docClient = DynamoDBDocumentClient.from(client);
@@ -54,7 +56,8 @@ export async function getClaim(claimId: string): Promise<Claim | null> {
 		return null;
 	}
 
-	const { PK, SK, ...claim } = result.Item; // remove keys before returning
+	// biome-ignore lint/correctness/noUnusedVariables: PK and SK are intentionally destructured to remove them from the returned object
+	const { PK, SK, ...claim } = result.Item;
 	return claim as Claim;
 }
 
@@ -107,7 +110,8 @@ export async function updateClaim(
 		throw new Error("Failed to update claim");
 	}
 
-	const { PK, SK, ...claim } = result.Attributes; // remove keys before returning
+	// biome-ignore lint/correctness/noUnusedVariables: PK and SK are intentionally destructured to remove them from the returned object
+	const { PK, SK, ...claim } = result.Attributes;
 	return claim as Claim;
 }
 
@@ -151,7 +155,8 @@ export async function getProject(projectId: string): Promise<Project | null> {
 		return null;
 	}
 
-	const { PK, SK, ...project } = result.Item; // remove keys before returning
+	// biome-ignore lint/correctness/noUnusedVariables: PK and SK are intentionally destructured to remove them from the returned object
+	const { PK, SK, ...project } = result.Item;
 	return project as Project;
 }
 
@@ -203,7 +208,8 @@ export async function updateProject(
 		throw new Error("Failed to update project");
 	}
 
-	const { PK, SK, ...project } = result.Attributes; // remove keys before returning
+	// biome-ignore lint/correctness/noUnusedVariables: PK and SK are intentionally destructured to remove them from the returned object
+	const { PK, SK, ...project } = result.Attributes;
 	return project as Project;
 }
 
@@ -292,30 +298,52 @@ export async function getClaimIdsForProject(
 
 export async function getProjectsForClaim(claimId: string): Promise<Project[]> {
 	const projectIds = await getProjectIdsForClaim(claimId);
-	const projects: Project[] = [];
+	const projectPromises = projectIds.map((projectId) => getProject(projectId));
+	const projectResults = await Promise.allSettled(projectPromises);
 
-	for (const projectId of projectIds) {
-		const project = await getProject(projectId);
-		if (project) {
-			projects.push(project);
+	const failedResults = projectResults.filter((r) => r.status === "rejected");
+	if (failedResults.length > 0) {
+		console.error(
+			`Failed to fetch ${failedResults.length} projects for claim ${claimId}`,
+		);
+		for (const result of failedResults) {
+			if (result.status === "rejected") {
+				console.error("Project fetch error:", result.reason);
+			}
 		}
 	}
 
-	return projects;
+	return projectResults
+		.filter(
+			(result): result is PromiseFulfilledResult<Project> =>
+				result.status === "fulfilled" && result.value !== null,
+		)
+		.map((result) => result.value);
 }
 
 export async function getClaimsForProject(projectId: string): Promise<Claim[]> {
 	const claimIds = await getClaimIdsForProject(projectId);
-	const claims: Claim[] = [];
+	const claimPromises = claimIds.map((claimId) => getClaim(claimId));
+	const claimResults = await Promise.allSettled(claimPromises);
 
-	for (const claimId of claimIds) {
-		const claim = await getClaim(claimId);
-		if (claim) {
-			claims.push(claim);
+	const failedResults = claimResults.filter((r) => r.status === "rejected");
+	if (failedResults.length > 0) {
+		console.error(
+			`Failed to fetch ${failedResults.length} claims for project ${projectId}`,
+		);
+		for (const result of failedResults) {
+			if (result.status === "rejected") {
+				console.error("Claim fetch error:", result.reason);
+			}
 		}
 	}
 
-	return claims;
+	return claimResults
+		.filter(
+			(result): result is PromiseFulfilledResult<Claim> =>
+				result.status === "fulfilled" && result.value !== null,
+		)
+		.map((result) => result.value);
 }
 
 export async function deleteAllProjectLinksForClaim(
