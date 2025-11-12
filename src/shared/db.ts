@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/correctness/noUnusedVariables: PK and SK are intentionally destructured to remove them from the returned object */
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import {
 	DeleteCommand,
@@ -56,7 +57,6 @@ export async function getClaim(claimId: string): Promise<Claim | null> {
 		return null;
 	}
 
-	// biome-ignore lint/correctness/noUnusedVariables: PK and SK are intentionally destructured to remove them from the returned object
 	const { PK, SK, ...claim } = result.Item;
 	return claim as Claim;
 }
@@ -110,7 +110,6 @@ export async function updateClaim(
 		throw new Error("Failed to update claim");
 	}
 
-	// biome-ignore lint/correctness/noUnusedVariables: PK and SK are intentionally destructured to remove them from the returned object
 	const { PK, SK, ...claim } = result.Attributes;
 	return claim as Claim;
 }
@@ -155,7 +154,6 @@ export async function getProject(projectId: string): Promise<Project | null> {
 		return null;
 	}
 
-	// biome-ignore lint/correctness/noUnusedVariables: PK and SK are intentionally destructured to remove them from the returned object
 	const { PK, SK, ...project } = result.Item;
 	return project as Project;
 }
@@ -208,7 +206,6 @@ export async function updateProject(
 		throw new Error("Failed to update project");
 	}
 
-	// biome-ignore lint/correctness/noUnusedVariables: PK and SK are intentionally destructured to remove them from the returned object
 	const { PK, SK, ...project } = result.Attributes;
 	return project as Project;
 }
