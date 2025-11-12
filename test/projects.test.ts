@@ -234,6 +234,16 @@ describe("Projects API", () => {
 
 			expectErrorResponse(result, 500);
 		});
+
+		it("should return 404 when path parameter is missing", async () => {
+			const event = {
+				...createGetByIdEvent("proj-123"),
+				pathParameters: null,
+			};
+			const result = await getHandler(event);
+
+			expectErrorResponse(result, 404);
+		});
 	});
 
 	describe("PATCH /projects/:id", () => {
@@ -323,6 +333,16 @@ describe("Projects API", () => {
 
 			expectErrorResponse(result, 500);
 		});
+
+		it("should return 404 when path parameter is missing", async () => {
+			const event = {
+				...createPatchEvent("proj-123", { name: "New Name" }),
+				pathParameters: null,
+			};
+			const result = await updateHandler(event);
+
+			expectErrorResponse(result, 404);
+		});
 	});
 
 	describe("DELETE /projects/:id", () => {
@@ -373,6 +393,16 @@ describe("Projects API", () => {
 			const result = await deleteHandler(event);
 
 			expectErrorResponse(result, 500);
+		});
+
+		it("should return 404 when path parameter is missing", async () => {
+			const event = {
+				...createDeleteEvent("proj-123"),
+				pathParameters: null,
+			};
+			const result = await deleteHandler(event);
+
+			expectErrorResponse(result, 404);
 		});
 	});
 });

@@ -260,6 +260,25 @@ describe("Claims API", () => {
 			}>(result);
 			expect(body.claim.projects).toHaveLength(2);
 		});
+
+		it("should return 404 when path parameter is missing", async () => {
+			const event = {
+				...createGetByIdEvent("claim-123"),
+				pathParameters: null,
+			};
+			const result = await getHandler(event);
+
+			expectErrorResponse(result, 404);
+		});
+
+		it("should handle database errors", async () => {
+			mockDb.getClaim.mockRejectedValue(new Error("DB Error"));
+
+			const event = createGetByIdEvent("claim-123");
+			const result = await getHandler(event);
+
+			expectErrorResponse(result, 500);
+		});
 	});
 
 	describe("PATCH /claims/:id", () => {
@@ -314,6 +333,27 @@ describe("Claims API", () => {
 				companyName: "Updated Corp",
 			});
 		});
+
+		it("should return 404 when path parameter is missing", async () => {
+			const event = {
+				...createPatchEvent("claim-123", { status: "Submitted" }),
+				pathParameters: null,
+			};
+			const result = await updateHandler(event);
+
+			expectErrorResponse(result, 404);
+		});
+
+		it("should handle database errors", async () => {
+			const existingClaim = createMockClaim();
+			mockDb.getClaim.mockResolvedValue(existingClaim);
+			mockDb.updateClaim.mockRejectedValue(new Error("DB Error"));
+
+			const event = createPatchEvent("claim-123", { status: "Submitted" });
+			const result = await updateHandler(event);
+
+			expectErrorResponse(result, 500);
+		});
 	});
 
 	describe("DELETE /claims/:id", () => {
@@ -340,6 +380,29 @@ describe("Claims API", () => {
 			const result = await deleteHandler(event);
 
 			expectErrorResponse(result, 404);
+		});
+
+		it("should return 404 when path parameter is missing", async () => {
+			const event = {
+				...createDeleteEvent("claim-123"),
+				pathParameters: null,
+			};
+			const result = await deleteHandler(event);
+
+			expectErrorResponse(result, 404);
+		});
+
+		it("should handle database errors", async () => {
+			const existingClaim = createMockClaim();
+			mockDb.getClaim.mockResolvedValue(existingClaim);
+			mockDb.deleteAllProjectLinksForClaim.mockRejectedValue(
+				new Error("DB Error"),
+			);
+
+			const event = createDeleteEvent("claim-123");
+			const result = await deleteHandler(event);
+
+			expectErrorResponse(result, 500);
 		});
 	});
 
@@ -397,6 +460,50 @@ describe("Claims API", () => {
 
 			expectErrorResponse(result, 404, "Project");
 		});
+
+		it("should return 404 when path parameter is missing", async () => {
+			const event = {
+				...createGetByIdEvent("claim-123"),
+				httpMethod: "POST",
+				pathParameters: null,
+				body: JSON.stringify({
+					projectIds: ["123e4567-e89b-12d3-a456-426614174001"],
+				}),
+			};
+			const result = await linkProjectsHandler(event);
+
+			expectErrorResponse(result, 404);
+		});
+
+		it("should return validation error for invalid request body", async () => {
+			const event = {
+				...createGetByIdEvent("claim-123"),
+				httpMethod: "POST",
+				body: JSON.stringify({
+					projectIds: "not-an-array",
+				}),
+			};
+			const result = await linkProjectsHandler(event);
+
+			expectValidationError(result);
+		});
+
+		it("should handle database errors", async () => {
+			mockDb.getClaim.mockResolvedValue(createMockClaim());
+			mockDb.getProject.mockResolvedValue(createMockProject());
+			mockDb.linkProjectToClaim.mockRejectedValue(new Error("DB Error"));
+
+			const event = {
+				...createGetByIdEvent("claim-123"),
+				httpMethod: "POST",
+				body: JSON.stringify({
+					projectIds: ["123e4567-e89b-12d3-a456-426614174001"],
+				}),
+			};
+			const result = await linkProjectsHandler(event);
+
+			expectErrorResponse(result, 500);
+		});
 	});
 
 	describe("DELETE /claims/:id/projects/:projectId", () => {
@@ -443,6 +550,40 @@ describe("Claims API", () => {
 			const result = await unlinkProjectHandler(event);
 
 			expectErrorResponse(result, 404, "Project");
+		});
+
+		it("should return 404 when claimId parameter is missing", async () => {
+			const event = {
+				...createDeleteEvent("claim-123"),
+				pathParameters: { projectId: "proj-123" },
+			};
+			const result = await unlinkProjectHandler(event);
+
+			expectErrorResponse(result, 404, "Claim");
+		});
+
+		it("should return 404 when projectId parameter is missing", async () => {
+			const event = {
+				...createDeleteEvent("claim-123"),
+				pathParameters: { id: "claim-123" },
+			};
+			const result = await unlinkProjectHandler(event);
+
+			expectErrorResponse(result, 404, "Project");
+		});
+
+		it("should handle database errors", async () => {
+			mockDb.getClaim.mockResolvedValue(createMockClaim());
+			mockDb.getProject.mockResolvedValue(createMockProject());
+			mockDb.unlinkProjectFromClaim.mockRejectedValue(new Error("DB Error"));
+
+			const event = {
+				...createDeleteEvent("claim-123"),
+				pathParameters: { id: "claim-123", projectId: "proj-123" },
+			};
+			const result = await unlinkProjectHandler(event);
+
+			expectErrorResponse(result, 500);
 		});
 	});
 });
