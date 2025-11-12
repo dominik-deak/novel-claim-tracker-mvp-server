@@ -18,7 +18,7 @@ import type {
 import { generateId, getCurrentTimestamp } from "../shared/utils";
 
 const app = express();
-const PORT = 3001;
+const PORT = Number.parseInt(process.env.MOCK_SERVER_PORT || "3001", 10);
 
 app.use(cors());
 app.use(express.json());
