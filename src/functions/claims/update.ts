@@ -1,6 +1,6 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { ZodError } from "zod";
-import { getClaim, updateClaim } from "../../shared/db";
+import { getClaim, getProjectsForClaim, updateClaim } from "../../shared/db";
 import {
 	internalErrorResponse,
 	notFoundResponse,
@@ -8,6 +8,8 @@ import {
 	validationErrorResponse,
 } from "../../shared/responses";
 import { UpdateClaimSchema } from "../../shared/schemas";
+import { validateStatusTransition } from "../../shared/statusValidation";
+import type { ClaimWithProjects } from "../../shared/types";
 import { getPathParameter, parseRequestBody } from "../../shared/utils";
 
 export async function handler(
@@ -26,9 +28,31 @@ export async function handler(
 			return notFoundResponse("Claim", claimId);
 		}
 
+		if (validated.status && validated.status !== existingClaim.status) {
+			try {
+				validateStatusTransition(existingClaim.status, validated.status);
+			} catch (error: unknown) {
+				if (error instanceof Error) {
+					return validationErrorResponse([
+						{
+							message: error.message,
+							path: ["status"],
+						},
+					]);
+				}
+				throw error;
+			}
+		}
+
 		const updatedClaim = await updateClaim(claimId, validated);
 
-		return successResponse({ claim: updatedClaim });
+		const projects = await getProjectsForClaim(claimId);
+		const claimWithProjects: ClaimWithProjects = {
+			...updatedClaim,
+			projects,
+		};
+
+		return successResponse({ claim: claimWithProjects });
 	} catch (error: unknown) {
 		console.error("Error updating claim:", error);
 		if (error instanceof ZodError) {
