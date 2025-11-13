@@ -2,6 +2,10 @@
 
 Backend API for the Novel Claim Tracker MVP - a full-stack application for managing UK R&D tax relief claims and projects.
 
+## 🌐 Live Deployment (won't work without the frontend)
+
+**API**: https://hqhbtqxig9.execute-api.eu-west-2.amazonaws.com/prod/
+
 ## 📋 Overview
 
 This backend provides a REST API built on AWS serverless infrastructure (Lambda + DynamoDB + API Gateway) for managing R&D tax relief claims and associated projects. The system supports a **many-to-many relationship** between claims and projects, reflecting real-world UK R&D tax relief practices where projects often span multiple accounting periods.
