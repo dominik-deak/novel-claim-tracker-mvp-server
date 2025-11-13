@@ -158,10 +158,13 @@ backend/
 ### Installation
 
 ```bash
-# Install dependencies from lockfile
-npm ci
+# Use Node.js v24 (via nvm)
+nvm use
 
-# Copy environment variables
+# Install dependencies
+npm install
+
+# Copy environment variables (optional for mock server)
 cp .env.example .env
 ```
 
@@ -835,6 +838,31 @@ The following environment variables are set by CDK and passed to Lambda function
 - `CLAIM_PROJECTS_TABLE` - Name of the ClaimProjects junction table
 
 For local mock server development, these are not required.
+
+## 🤖 AI Usage Notes
+
+This project was built with AI assistance (as permitted by Novel's challenge guidelines). Here's how AI was used throughout development:
+
+**Domain Research:**
+- Researched UK SME R&D tax relief domain to understand business requirements
+- Investigated how R&D projects span multiple claim periods
+- Understood typical claim workflows and status transitions
+
+**AWS Infrastructure:**
+- Researched DynamoDB design patterns and best practices
+- Helped write boilerplate for Lambda functions and CDK stack definitions
+- Assisted with AWS CDK CLI commands and deployment workflows
+
+**Development Acceleration:**
+- Automated rapid API endpoint testing and fast iteration with curl scripts
+- Helped write comprehensive unit tests for Lambda functions and utilities
+
+**Documentation:**
+- Generated comprehensive API documentation
+- Generated comprehensive README documentation
+
+**Validation:**
+AI-generated code was reviewed, tested, and validated before inclusion. The architecture decisions and trade-offs were made independently with AI providing research and implementation assistance.
 
 ## 🗺️ Potential Future Enhancements
 
