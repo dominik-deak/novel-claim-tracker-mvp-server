@@ -43,30 +43,31 @@ export interface ProjectWithClaims extends Project {
 	claims: Claim[];
 }
 
-export interface CreateClaimInput {
-	companyName: string;
-	claimPeriod: ClaimPeriod;
-	amount: number;
-	projectIds?: string[]; // Optional array of project IDs to link
-}
+/* Not needed in the end - only on the frontend */
+// export interface CreateClaimInput {
+// 	companyName: string;
+// 	claimPeriod: ClaimPeriod;
+// 	amount: number;
+// 	projectIds?: string[]; // Optional array of project IDs to link
+// }
 
-export interface UpdateClaimInput {
-	status?: ClaimStatus;
-	companyName?: string;
-	claimPeriod?: ClaimPeriod;
-	amount?: number;
-}
+// export interface UpdateClaimInput {
+// 	status?: ClaimStatus;
+// 	companyName?: string;
+// 	claimPeriod?: ClaimPeriod;
+// 	amount?: number;
+// }
 
-export interface CreateProjectInput {
-	name: string;
-	description: string;
-}
+// export interface CreateProjectInput {
+// 	name: string;
+// 	description: string;
+// }
 
-export interface UpdateProjectInput {
-	name?: string;
-	description?: string;
-}
+// export interface UpdateProjectInput {
+// 	name?: string;
+// 	description?: string;
+// }
 
-export interface LinkProjectsInput {
-	projectIds: string[];
-}
+// export interface LinkProjectsInput {
+// 	projectIds: string[];
+// }
